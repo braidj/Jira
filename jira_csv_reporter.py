@@ -1,7 +1,5 @@
 import pandas as pd
 import os
-import re
-
 
 def clean_comment(comment):
 
@@ -12,9 +10,11 @@ def clean_comment(comment):
         # Replace '|' with newlines
         comment = comment.replace('|', '\n')
         
-        # Extract and format timestamps
-        comment = re.sub(r'(\d{2}/\w{3}/\d{2} \d{2}:\d{2});[^\n]*', r'\1', comment)
-    
+        # Remove Jira user identifiers
+        users = ['635be0cdd66d8108a1243fe4']
+        for user in users:
+            comment = comment.replace(user, '')
+
     return comment
 
 def main():
@@ -23,7 +23,7 @@ def main():
     source_csv = f"{downloads}data.csv"
     excel_report = f"{downloads}output.xlsx"
 
-    basic_cols = ['Issue key', 'Summary', 'Description', 'Status']
+    basic_cols = ['Issue key', 'Summary', 'Description', 'Status', 'Priority']
 
     df = pd.read_csv(source_csv)
 
@@ -40,13 +40,13 @@ def main():
     # Create an Excel writer object
     excel_writer = pd.ExcelWriter(excel_report, engine='openpyxl')
 
-    # Iterate over unique values in the 'Status' column and save each as a separate tab
-    for status_value in df['Status'].unique():
-        status_df = df[df['Status'] == status_value]
-        status_df.to_excel(excel_writer, sheet_name=status_value, index=False)
+    with pd.ExcelWriter(excel_report, engine='openpyxl') as excel_writer:
 
-    # Save the Excel file
-    excel_writer.save()
+        # Iterate over unique values in the 'Status' column and save each as a separate tab
+        for status_value in df['Status'].unique():
+            status_df = df[df['Status'] == status_value]
+            status_df.to_excel(excel_writer, sheet_name=status_value, index=False)
+
 
     print(f"Data separated by 'Status' column and saved to {excel_report}")
 
