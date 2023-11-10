@@ -20,7 +20,7 @@ def clean_comment(comment):
 def main():
 
     downloads = f'{os.path.expanduser("~")}{os.sep}Downloads{os.sep}'
-    source_csv = f"{downloads}data.csv"
+    source_csv = f"{downloads}Jira.csv"
     excel_report = f"{downloads}output.xlsx"
 
     basic_cols = ['Issue key', 'Summary', 'Description', 'Status', 'Priority']
