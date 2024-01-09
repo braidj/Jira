@@ -1,5 +1,7 @@
 import pandas as pd
 import os
+import sys
+import config
 
 def clean_comment(comment):
 
@@ -19,9 +21,14 @@ def clean_comment(comment):
 
 def main():
 
+    client_raw = input("Enter client name: ")
+    client = client_raw.lower()
+    report_name = config.report[client]
+    required_tabs = config.display_tabs[client].split(',')
+
     downloads = f'{os.path.expanduser("~")}{os.sep}Downloads{os.sep}'
     source_csv = f"{downloads}Jira.csv"
-    excel_report = f"{downloads}output.xlsx"
+    excel_report = f"{downloads}{report_name}"
 
     basic_cols = ['Issue key', 'Summary', 'Description', 'Status', 'Priority']
 
@@ -44,9 +51,11 @@ def main():
 
         # Iterate over unique values in the 'Status' column and save each as a separate tab
         for status_value in df['Status'].unique():
-            status_df = df[df['Status'] == status_value]
-            status_df.to_excel(excel_writer, sheet_name=status_value, index=False)
-
+            if status_value in required_tabs:
+                status_df = df[df['Status'] == status_value]
+                status_df.to_excel(excel_writer, sheet_name=status_value, index=False)
+            else:
+                print(f"Status '{status_value}' not required, skipping...")
 
     print(f"Data separated by 'Status' column and saved to {excel_report}")
 
